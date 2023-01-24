@@ -12,7 +12,16 @@ after_success:
   - docker build -t som/multi-client ./client 
   - docker build -t som/multi-nginx ./nginx 
   - docker build -t som/multi-server ./server 
-  - docker build -t som/multi-worker ./worker 
+  - docker build -t som/multi-worker ./worker
+
+  #Login to Docker CLI
+  - echo "$DOCKER_PASSWORD | docker login -u "$DOCKER_ID" --password-stdin
+
+  #Take the images and push to docker hub
+  - docker push som/multi-client
+  - docker push som/multi-nginx
+  - docker push som/multi-server
+  - docker push som/multi-worker
 
 
 
