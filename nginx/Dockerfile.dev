@@ -1,0 +1,9 @@
+#This will be a Dockerfile to make a custom nginx image for us
+FROM nginx:latest
+
+#So far we have mainly copied files to another folder inside the container.
+#But here we are trying to replace the contents of a file in some directory
+# So, nginx already have a default.conf by default, we are overidding everything of that file with our default.conf file. 
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+
+#Default command is the default command of the nginx image which is to start the nginx server, so we do not need to specify it explicitly. So remember if we DONOT SPECIFY A DEFAULT COMMAND in the Dockerfile, the DEFAULT COMMAND of the image specified in FROM takes precedence. 

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  
+  #Configuring nginx server
+  nginx:
+    restart: always #This is front end to end users, so want it to be always up
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+      - '3050:80'
+
+  postgres:
+    image: 'postgres:latest'
+    environment:
+      - POSTGRES_PASSWORD=postgres_password
+
+  redis:
+    image: 'redis:latest'
+
+  # Configuring server service
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      # N.B. Here we dont have just . since we want to have #context as the server folder. This is the use of context option. We are executing docker-compose from the root directory, but we want the server build from the server folder. Hence we use this context: ./server  
+      context: ./server
+    
+    volumes:
+      - /app/node_modules  # This is bookmarking the node_modules inside the container, i.e. do not mess with this. Keep it as is.
+      - ./server:/app # Apart from node_modules for any code change the container should look keep looking into the ./server folder. So any change in the server folder will be automatically reflected in the app folder of the container.
+    
+    #Specifying environment variables
+    environment:
+      - REDIS_HOST=redis # We can just specify name of the service
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres
+      - PGDATABASE=postgres
+      - PGPASSWORD=postgres_password
+      - PGPORT=5432
+
+  # Configuring Worker service
+  worker:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis # We can just specify name of the service
+      - REDIS_PORT=6379
+
+  # Configuring Client service
+  client:
+    build: 
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+    environment:
+      - WDS_SOCKET_PORT=0
+
+
